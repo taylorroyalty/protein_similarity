@@ -5,9 +5,14 @@ Created on Mon Aug 17 07:00:47 2020
 @author: Taylor Royalty
 """
 
+#%%
+
+import csv
+
+from itertools import combinations_with_replacement
 from Bio import SeqIO
 from re import split as r_split
-import csv 
+ 
 #%%    
 def swiss_fasta2table(fasta,write=False,filename='output.tsv',delim='\t'):    
 # =============================================================================
@@ -70,3 +75,26 @@ def ncbi_fasta2table(fasta,write=False,filename='output.tsv',delim='\t'):
             wr.writerows(anno_seq_list)
             
     return anno_seq_list
+
+#%%
+
+def unique_aa_motifs(n):
+# =============================================================================
+# generates a list containing all unique amino acid motifs.
+# --n is an integer which defines length of motifs
+# =============================================================================
+    aa = 'ACDEFGHIKLMNPQRSTVWY'
+    
+    aa_motifs = list(combinations_with_replacement(aa,n))
+    aa_motifs_forward = [''.join(i) for i in aa_motifs] 
+    aa_motifs_backward = [i[::-1] for i in aa_motifs_forward] #considers reverse order
+    aa_motif_all = aa_motifs_forward+aa_motifs_backward #combine forward backwards for all combinations
+    
+    aa_motif_all =list(set(aa_motif_all))#set removes duplicate sequences, e.g., AA, YY, etc 
+    
+    return aa_motif_all
+
+#%%
+
+def count_sequence_motifs(aa_motifs,sequences):
+    
