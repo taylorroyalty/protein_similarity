@@ -8,6 +8,7 @@ Created on Mon Aug 17 07:00:47 2020
 #%%
 
 import csv
+import pandas as pd
 
 from itertools import combinations_with_replacement
 from Bio import SeqIO
@@ -96,5 +97,31 @@ def unique_aa_motifs(n):
 
 #%%
 
-def count_sequence_motifs(aa_motifs,sequences):
+def count_sequence_motifs(aa_motif,sequences):
+# =============================================================================
+# a function for counting motifs in sequences. returns a Dataframe (columns=[motif, sequence, counts])
+# --aa_motif is a list where elements are amino acid motifs being tabulated in seqeunces
+# --sequences is a list containing amino acid sequences where motifs are being tabulated
+# =============================================================================
+    def CountOccurrences(main_string, substring):
+# =============================================================================
+# a subfunction for counts the occurence of substrings in string.
+# --the string variable is the string to be counted for substring
+# --substring is the string pattern being searched for in main_string
+# =============================================================================
+        count = 0
+        start = main_string.find(substring, 0) 
+        while start < len(main_string): 
+            pos = main_string.find(substring, start)   
+            if pos != -1: 
+                start = pos + 1
+                count += 1
+            else: 
+                break
+        return count
+    
+    count_matrix=[[CountOccurrences(seq,motif) for seq in sequences]+[motif] for motif in aa_motif]
+    count_df=pd.DataFrame(data=count_matrix,columns=(sequences+['motif']))
+    return pd.melt(count_df,id_vars='motif',var_name='sequence',value_name='counts')
+  
     

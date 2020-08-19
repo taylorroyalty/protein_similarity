@@ -2,13 +2,28 @@
 """
 Created on Tue Aug 18 14:24:15 2020
 
-@author: Peng
+@author: Taylor
 """
-#compile function generating sequences
 
+#import packages and modules
 import sys
+import quantify_fasta as qf
+import pandas as pd
+
+#relative path to python scripts
 sys.path.insert(1,'scripts/python')
 
-from fasta2table import swiss_fasta2table
+#read in fasta file and convert to dataframe
+swiss = qf.swiss_fasta2table('data/swiss_prot_08032020.fasta')
+swiss = pd.DataFrame(swiss,columns=(['annotation','sequence']))
 
-swiss=swiss_fasta2table('data/swiss_prot_08032020.fasta')
+#count annotations in swiss prot
+swiss_max = swiss.annotation.mode()
+swiss_max_sequence=swiss[swiss.annotation == swiss_max[0]]
+
+#define amino acid motifs based on sequence length
+aa_motif=qf.unique_aa_motifs(2)
+
+
+motif_count_df=qf.count_sequence_motifs(aa_motif,swiss_max_sequence['sequence'].tolist())
+
