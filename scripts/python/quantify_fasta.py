@@ -9,6 +9,7 @@ Created on Mon Aug 17 07:00:47 2020
 
 import csv
 import pandas as pd
+import numpy as np
 
 from itertools import combinations_with_replacement
 from Bio import SeqIO
@@ -123,5 +124,60 @@ def count_sequence_motifs(aa_motif,sequences):
     count_matrix=[[CountOccurrences(seq,motif) for seq in sequences]+[motif] for motif in aa_motif]
     count_df=pd.DataFrame(data=count_matrix,columns=(sequences+['motif']))
     return pd.melt(count_df,id_vars='motif',var_name='sequence',value_name='counts')
-  
+
     
+#%%
+def iterative_levenshtein(s, t):
+    #this function was written from https://www.python-course.eu/levenshtein_distance.php
+    """ 
+        iterative_levenshtein(s, t) -> ldist
+        ldist is the Levenshtein distance between the strings 
+        s and t.
+        For all i and j, dist[i,j] will contain the Levenshtein 
+        distance between the first i characters of s and the 
+        first j characters of t
+    """
+
+    rows = len(s)+1
+    cols = len(t)+1
+    dist = [[0 for x in range(cols)] for x in range(rows)]
+
+    # source prefixes can be transformed into empty strings 
+    # by deletions:
+    for i in range(1, rows):
+        dist[i][0] = i
+
+    # target prefixes can be created from an empty source string
+    # by inserting the characters
+    for i in range(1, cols):
+        dist[0][i] = i
+        
+    for col in range(1, cols):
+        for row in range(1, rows):
+            if s[row-1] == t[col-1]:
+                cost = 0
+            else:
+                cost = 1
+            dist[row][col] = min(dist[row-1][col] + 1,      # deletion
+                                 dist[row][col-1] + 1,      # insertion
+                                 dist[row-1][col-1] + cost) # substitution
+
+    # for r in range(rows):
+    #     print(dist[r])
+    
+ 
+    return dist[row][col]
+
+#%%
+def parallel_lev_dist(seq_df,anno):
+    tmp_df=seq_df[seq_df["annotation"] == anno].reset_index(drop=True)
+    
+    seq_n=len(tmp_df)
+    lev_dist=np.zeros((seq_n,seq_n),dtype=int)
+    for i in range(seq_n):
+        seq1=tmp_df["sequence"][i]
+        for j in range(i+1,seq_n):
+            seq2=tmp_df["sequence"][j]
+            lev_dist[i,j]=iterative_levenshtein(seq1,seq2)
+            
+    return lev_dist

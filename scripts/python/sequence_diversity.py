@@ -22,8 +22,9 @@ swiss_max = swiss.annotation.mode()
 swiss_max_sequence=swiss[swiss.annotation == swiss_max[0]]
 
 #define amino acid motifs based on sequence length
-aa_motif=qf.unique_aa_motifs(2)
+aa_motif=qf.unique_aa_motifs(3)
 
 
 motif_count_df=qf.count_sequence_motifs(aa_motif,swiss_max_sequence['sequence'].tolist())
 
+motif_sums=motif_count_df.groupby(by='motif').sum()
