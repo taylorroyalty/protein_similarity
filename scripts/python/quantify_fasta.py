@@ -171,9 +171,9 @@ def iterative_levenshtein(s, t):
     return dist[row][col]
 
 #%%
-def parallel_lev_dist(seq_df,anno,write=False,write_path='data/lev_distances/'):
+def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/'):
     tmp_df=seq_df[seq_df["annotation"] == anno].reset_index(drop=True)
-    
+    print(anno)
     seq_n=len(tmp_df)
     lev_dist=np.zeros((seq_n,seq_n),dtype=int)
     # lev_dist=pd.DataFrame(data=np.zero(shape=(seq_n,seq_n)),columns=df["sequence"],index=df["sequence"])
@@ -192,11 +192,7 @@ def parallel_lev_dist(seq_df,anno,write=False,write_path='data/lev_distances/'):
     lev_dist_df['annotation']=anno
     lev_dist_df=pd.melt(lev_dist_df,id_vars='id',var_name='id2',value_name='lev_dist')
     
-    #determine if dataframe is to be written
-    if write == True:
-        write_path=write_path+anno+'.tsv'
-        write_path=write_path.replace(' ','_')
-        lev_dist_df.to_csv(write_path, header=True, index=False, sep='\t')
-        
-    
-    return lev_dist_df
+    #write dataframe
+    write_path=write_path+anno+'.tsv'
+    write_path=write_path.replace(' ','_')
+    lev_dist_df.to_csv(write_path, header=True, index=False, sep='\t')
