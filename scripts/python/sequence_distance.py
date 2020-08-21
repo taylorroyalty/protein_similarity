@@ -19,16 +19,15 @@ from joblib import Parallel, delayed
 
 #read in fasta file and convert to dataframe
 swiss = qf.swiss_fasta2table('data/swiss_prot_08032020.fasta')
-swiss = pd.DataFrame(swiss,columns=(['annotation','sequence']))
+swiss = pd.DataFrame(swiss,columns=(['id','annotation','sequence']))
 
 #generate all unique annotations
-swiss_anno_500=swiss.groupby("annotation").filter(lambda x: len(x)>499).reset_index(drop=True)
+swiss_anno_500=swiss.groupby("annotation").filter(lambda x: len(x)>700).reset_index(drop=True)
 swiss_anno_uniq=swiss_anno_500.annotation.unique()
 
-
-
-
 results = Parallel(n_jobs=1)(delayed(qf.parallel_lev_dist)(swiss_anno_500,anno) for anno in swiss_anno_500["annotation"])
+print(results)
+
 # for anno in swiss_anno_uniq[0:2]:
 #     swiss_tmp=swiss_anno_500[swiss_anno_500["annotation"] == anno]
 #     seq_n=len(swiss_tmp)

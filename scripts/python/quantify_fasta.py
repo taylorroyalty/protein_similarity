@@ -10,7 +10,9 @@ Created on Mon Aug 17 07:00:47 2020
 import csv
 import pandas as pd
 import numpy as np
-
+import Levenshtein as lev #C libraries; much faster than python script
+#https://codereview.stackexchange.com/questions/217065/calculate-levenshtein-distance-between-two-strings-in-python
+#https://pypi.org/project/python-Levenshtein/
 from itertools import combinations_with_replacement
 from Bio import SeqIO
 from re import split as r_split
@@ -31,9 +33,9 @@ def swiss_fasta2table(fasta,write=False,filename='output.tsv',delim='\t'):
 #   the sequence record is decomposed into the sequence and annotation. 
 #   the annotation is parsed from the annotation.
 # =============================================================================
-        annotation, sequence= seq_rec.description, str(seq_rec.seq)
+        unique_id, annotation, sequence=seq_rec.id, seq_rec.description, str(seq_rec.seq)
         annotation=(annotation.split(" OS=")[0]).split(" ", 1)[1]
-        return [annotation,sequence]
+        return [unique_id, annotation,sequence]
     
     fasta_iter = SeqIO.parse(open(fasta),"fasta") #convert fasta file to fastaiterator object
     anno_seq_list=[swiss_anno_seq(entry) for entry in fasta_iter] #return a list of sequences and annotations
@@ -41,7 +43,7 @@ def swiss_fasta2table(fasta,write=False,filename='output.tsv',delim='\t'):
     if write == True:
         with open(filename,'w',newline='') as f:
             wr=csv.writer(f,delimiter=delim)
-            wr.writerow(['annotation','sequence'])
+            wr.writerow(['id','annotation','sequence'])
             wr.writerows(anno_seq_list)
             
     return anno_seq_list
@@ -169,15 +171,32 @@ def iterative_levenshtein(s, t):
     return dist[row][col]
 
 #%%
-def parallel_lev_dist(seq_df,anno):
+def parallel_lev_dist(seq_df,anno,write=False,write_path='data/lev_distances/'):
     tmp_df=seq_df[seq_df["annotation"] == anno].reset_index(drop=True)
     
     seq_n=len(tmp_df)
     lev_dist=np.zeros((seq_n,seq_n),dtype=int)
+    # lev_dist=pd.DataFrame(data=np.zero(shape=(seq_n,seq_n)),columns=df["sequence"],index=df["sequence"])
     for i in range(seq_n):
         seq1=tmp_df["sequence"][i]
-        for j in range(i+1,seq_n):
+        for j in range(i,seq_n):
             seq2=tmp_df["sequence"][j]
-            lev_dist[i,j]=iterative_levenshtein(seq1,seq2)
-            
-    return lev_dist
+            lev_dist[i,j]=lev.distance(seq1,seq2)
+    
+    #make similarity matrix symmetric
+    lev_dist = lev_dist + lev_dist.T - np.diag(np.diag(lev_dist))
+    
+    #format results as dataframe 
+    lev_dist_df=pd.DataFrame(data=lev_dist,columns=tmp_df["id"])
+    lev_dist_df['id']=tmp_df["id"]
+    lev_dist_df['annotation']=anno
+    lev_dist_df=pd.melt(lev_dist_df,id_vars='id',var_name='id2',value_name='lev_dist')
+    
+    #determine if dataframe is to be written
+    if write == True:
+        write_path=write_path+anno+'.tsv'
+        write_path=write_path.replace(' ','_')
+        lev_dist_df.to_csv(write_path, header=True, index=False, sep='\t')
+        
+    
+    return lev_dist_df
