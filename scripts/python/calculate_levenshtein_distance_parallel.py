@@ -28,7 +28,8 @@ swiss = pd.DataFrame(swiss,columns=(['id','annotation','sequence']))
 swiss_anno_500=swiss.groupby("annotation").filter(lambda x: len(x)>700).reset_index(drop=True)
 swiss_anno_uniq=swiss_anno_500.annotation.unique()
 
-Parallel(n_jobs=n)(delayed(qf.parallel_lev_dist)(swiss_anno_500,anno) for anno in swiss_anno_uniq["annotation"])
+#parallelize levenshstein distance calculation for fasta files
+Parallel(n_jobs=n)(delayed(qf.parallel_lev_dist)(swiss_anno_500,anno) for anno in swiss_anno_uniq)
 
 # for anno in swiss_anno_uniq[0:2]:
 #     swiss_tmp=swiss_anno_500[swiss_anno_500["annotation"] == anno]
