@@ -8,6 +8,8 @@ Created on Mon Aug 17 07:00:47 2020
 #%%
 
 import csv
+import matplotlib.pyplot as plt
+from sklearn.cluster import OPTICS
 import pandas as pd
 import numpy as np
 import Levenshtein as lev #C libraries; much faster than python script
@@ -172,6 +174,16 @@ def iterative_levenshtein(s, t):
 
 #%%
 def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/'):
+# =============================================================================
+# allows for implementing the parallelization of levenshtien distance for different
+# protein classes. Distance matrices are converted into dataframes and written as tsv
+# files.
+# -seq_df dataframe (requires columns: "annotation" and "sequence"). Annotation
+#  contains label for sequence. Sequence contains the sequence as a string.
+# -anno is an argument passed specifying which annotation to calculate distances for
+#  this is a string.
+# - write_path is a directory to write (tsv files) dataframes containing distances. 
+# =============================================================================
     tmp_df=seq_df[seq_df["annotation"] == anno].reset_index(drop=True)
     seq_n=len(tmp_df)
     lev_dist=np.zeros((seq_n,seq_n),dtype=int)
@@ -184,16 +196,28 @@ def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/'):
     
     #make similarity matrix symmetric
     lev_dist = lev_dist + lev_dist.T - np.diag(np.diag(lev_dist))
-    
+        
     #format results as dataframe 
-    lev_dist_df=pd.DataFrame(data=lev_dist,columns=tmp_df["id"])
-    lev_dist_df['id']=tmp_df["id"]
-    lev_dist_df['annotation']=anno
-    lev_dist_df=pd.melt(lev_dist_df,id_vars='id',var_name='id2',value_name='lev_dist')
+    # lev_dist_df=pd.DataFrame(data=lev_dist,columns=tmp_df["id"])
+    # lev_dist_df['id']=tmp_df["id"]
+    # lev_dist_df['annotation']=anno
+    # lev_dist_df=pd.melt(lev_dist_df,id_vars='id',var_name='id2',value_name='lev_dist')
     
-    #write dataframe
+    #write 
     anno_correct=anno.replace('/','_')
-    write_path=write_path+anno_correct+'.tsv'
+    write_path=write_path+anno_correct+'.csv'
     write_path=write_path.replace(' ','_')
     print(write_path)
-    lev_dist_df.to_csv(write_path, header=True, index=False, sep='\t')
+    with open(write_path,'w',newline='') as f:
+        wr=csv.writer(f,delimiter=',')
+        wr.writerows(lev_dist)
+    # lev_dist_df.to_csv(write_path, header=True, index=False, sep='\t')
+
+
+# #%%
+# def optics_lev_dist(lev_dist_mat):
+# # =============================================================================
+# # 
+# # =============================================================================
+
+# OPTICS(lev)

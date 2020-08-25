@@ -9,19 +9,17 @@ import sys
 #relative path to python scripts
 sys.path.insert(1,'scripts/python')
 
-import numpy as np
 import quantify_fasta as qf
 import pandas as pd
-import multiprocessing
 
 from joblib import Parallel, delayed
 
 
 #number of cores to use
-n = 30
+n = 1
 
 #read in fasta file and convert to dataframe
-swiss = qf.swiss_fasta2table('/srv/data/swiss_prot/swiss_prot_08032020.fasta')
+swiss = qf.swiss_fasta2table('data/swiss_prot_08032020.fasta')
 swiss = pd.DataFrame(swiss,columns=(['id','annotation','sequence']))
 
 #generate all unique annotations
