@@ -214,10 +214,4 @@ def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/'):
     # lev_dist_df.to_csv(write_path, header=True, index=False, sep='\t')
 
 
-# #%%
-# def optics_lev_dist(lev_dist_mat):
-# # =============================================================================
-# # 
-# # =============================================================================
 
-# OPTICS(lev)
