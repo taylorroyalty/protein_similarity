@@ -37,7 +37,7 @@ for filename in os.listdir(dist_dir):
     #create stoarge array for results
     n_clust_tmp=np.zeros(shape=(10,),dtype=int)
     for pnt in minpoint_range:    
-        optic_obj=OPTICS(min_samples=pnt,algorithm='ball_tree')
+        optic_obj=OPTICS(min_samples=pnt,algorithm='ball_tree',n_jobs=1)
         optic_clust=optic_obj.fit(file)
         n_clust_tmp[0,i]=len(np.unique(optic_clust.labels_[optic_clust.labels_>-1]))
         i+=1
