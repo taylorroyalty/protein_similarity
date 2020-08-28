@@ -9,6 +9,7 @@ Created on Mon Aug 17 07:00:47 2020
 
 import csv
 import random
+import warnings
 # import matplotlib.pyplot as plt
 # from sklearn.cluster import OPTICS
 import pandas as pd
@@ -185,6 +186,7 @@ def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/',null=False):
 #  this is a string.
 # - write_path is a directory to write (tsv files) dataframes containing distances. 
 # =============================================================================
+    warnings.filterwarnings("ignore", category=RuntimeWarning) 
     tmp_df=seq_df[seq_df["annotation"] == anno].reset_index(drop=True)
     seq_n=len(tmp_df)
     lev_dist=np.zeros((seq_n,seq_n),dtype=int)
@@ -198,7 +200,7 @@ def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/',null=False):
     
     #write name
     anno_correct=anno.replace('/','_')
-    anno_correct=anno.replace('?','_')
+    anno_correct=anno_correct.replace('?','_')
     if null==True:
         write_path=write_path+anno_correct+"_null"
         #find upper diagonal indices
@@ -215,7 +217,7 @@ def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/',null=False):
         lev_dist[u_index]=lev_dist[u_index_rand]
         
         
-    write_path=write_path+anno_correct+'.csv'
+    write_path=write_path+'.csv'
     write_path=write_path.replace(' ','_')
     print(write_path)
     
