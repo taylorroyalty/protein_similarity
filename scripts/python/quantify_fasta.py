@@ -8,8 +8,9 @@ Created on Mon Aug 17 07:00:47 2020
 #%%
 
 import csv
-import matplotlib.pyplot as plt
-from sklearn.cluster import OPTICS
+import random
+# import matplotlib.pyplot as plt
+# from sklearn.cluster import OPTICS
 import pandas as pd
 import numpy as np
 import Levenshtein as lev #C libraries; much faster than python script
@@ -173,7 +174,7 @@ def iterative_levenshtein(s, t):
     return dist[row][col]
 
 #%%
-def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/'):
+def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/',null=False):
 # =============================================================================
 # allows for implementing the parallelization of levenshtien distance for different
 # protein classes. Distance matrices are converted into dataframes and written as tsv
@@ -194,23 +195,37 @@ def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/'):
             seq2=tmp_df["sequence"][j]
             lev_dist[i,j]=lev.distance(seq1,seq2)
     
-    #make similarity matrix symmetric
-    lev_dist = lev_dist + lev_dist.T - np.diag(np.diag(lev_dist))
-        
-    #format results as dataframe 
-    # lev_dist_df=pd.DataFrame(data=lev_dist,columns=tmp_df["id"])
-    # lev_dist_df['id']=tmp_df["id"]
-    # lev_dist_df['annotation']=anno
-    # lev_dist_df=pd.melt(lev_dist_df,id_vars='id',var_name='id2',value_name='lev_dist')
     
-    #write 
+    #write name
     anno_correct=anno.replace('/','_')
+    anno_correct=anno.replace('?','_')
+    if null==True:
+        write_path=write_path+anno_correct+"_null"
+        #find upper diagonal indices
+        u_index=np.triu_indices(seq_n,k=1)
+        #determine number of indices in pper diagonal
+        ulen=int((seq_n**2-seq_n)/2)
+        #define array for indexing u_index
+        tup_index=np.linspace(0,ulen-1,ulen,dtype=int)
+        #randomize indices
+        random.shuffle(tup_index)
+        #re-arrange u_index (maintains row and column pairs)
+        u_index_rand=[arr[tup_index] for arr in u_index]
+        #randomize indices for tuple of uindex
+        lev_dist[u_index]=lev_dist[u_index_rand]
+        
+        
     write_path=write_path+anno_correct+'.csv'
     write_path=write_path.replace(' ','_')
     print(write_path)
+    
+    #make similarity matrix symmetric
+    lev_dist = lev_dist + lev_dist.T - np.diag(np.diag(lev_dist))
+    
     with open(write_path,'w',newline='') as f:
         wr=csv.writer(f,delimiter=',')
         wr.writerows(lev_dist)
+        wr.writerow(tmp_df["id"].to_numpy())
     # lev_dist_df.to_csv(write_path, header=True, index=False, sep='\t')
 
 

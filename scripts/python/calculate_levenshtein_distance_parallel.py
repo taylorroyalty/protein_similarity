@@ -23,11 +23,11 @@ swiss = qf.swiss_fasta2table('data/swiss_prot_08032020.fasta')
 swiss = pd.DataFrame(swiss,columns=(['id','annotation','sequence']))
 
 #generate all unique annotations
-swiss_anno_500=swiss.groupby("annotation").filter(lambda x: len(x)>700).reset_index(drop=True)
+swiss_anno_500=swiss.groupby("annotation").filter(lambda x: len(x)>100).reset_index(drop=True)
 swiss_anno_uniq=swiss_anno_500.annotation.unique()
 
 #parallelize levenshstein distance calculation for fasta files
-Parallel(n_jobs=n)(delayed(qf.parallel_lev_dist)(swiss_anno_500,anno) for anno in swiss_anno_uniq)
+Parallel(n_jobs=n)(delayed(qf.parallel_lev_dist)(swiss_anno_500,anno,write_path='data/lev_distances_null/',null=True) for anno in swiss_anno_uniq)
 
 # for anno in swiss_anno_uniq[0:2]:
 #     swiss_tmp=swiss_anno_500[swiss_anno_500["annotation"] == anno]
