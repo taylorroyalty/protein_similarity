@@ -201,8 +201,9 @@ def parallel_lev_dist(seq_df,anno,write_path='data/lev_distances/',null=False):
     #write name
     anno_correct=anno.replace('/','_')
     anno_correct=anno_correct.replace('?','_')
+    write_path=write_path+anno_correct
     if null==True:
-        write_path=write_path+anno_correct+"_null"
+        write_path=write_path+"_null"
         #find upper diagonal indices
         u_index=np.triu_indices(seq_n,k=1)
         #determine number of indices in pper diagonal

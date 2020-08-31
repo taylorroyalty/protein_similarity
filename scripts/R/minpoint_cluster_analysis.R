@@ -1,6 +1,6 @@
 library(tidyverse)
 
-dir_path="data/cluster_analysis/"
+dir_path="data/cluster_analysis_null/"
 
 files=dir(dir_path,full.names = TRUE)
 

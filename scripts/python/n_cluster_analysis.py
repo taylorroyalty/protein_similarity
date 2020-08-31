@@ -24,7 +24,7 @@ n=1
 def parallel_OPTICS_cluster_sensitivity(filename,dist_dir,write_path):
     #suppress runtime warning for OPTICS algorithm. dividing by small number 
     warnings.filterwarnings("ignore", category=RuntimeWarning) 
-    file=np.loadtxt(dist_dir+filename,delimiter=',', dtype=float) 
+    file=np.loadtxt(open(dist_dir+filename,'rt').readlines()[:-1],delimiter=",")
     file=file[:-1,:]
     
     #determine number of samples
@@ -46,33 +46,6 @@ def parallel_OPTICS_cluster_sensitivity(filename,dist_dir,write_path):
         i+=1
     
     df_tmp.to_csv(write_path+filename, header=True, index=False)
-    
-def parallel_OPTICS_cluster_null_model(filename,dist_dir,write_path):
-    #suppress runtime warning for OPTICS algorithm. dividing by small number 
-    warnings.filterwarnings("ignore", category=RuntimeWarning) 
-    file=np.loadtxt(dist_dir+filename,delimiter=',', dtype=float) 
-    file=file[:-1,:]
-    
-    #determine number of samples
-    n_samp=file.shape[1]
-    #create a vector of evenly lognormally-spaced minpoints to test for minimum size of the clster
-    minpoint_range=2**np.linspace(math.log2(5),math.log2(n_samp/10),20)
-    minpoint_range=minpoint_range.astype(int)
-
-    i=0
-    #create stoarge array for results
-    df_tmp=pd.DataFrame(data=np.zeros(shape=(10,3)),columns=["annotation","clusters","minpoints"])
-    df_tmp["minpoints"]=minpoint_range
-    df_tmp["annotation"]=filename
-    print(filename)
-    for pnt in minpoint_range:    
-        optic_obj=OPTICS(min_samples=pnt,algorithm='ball_tree')
-        optic_clust=optic_obj.fit(file)
-        df_tmp.iloc[i,1]=len(np.unique(optic_clust.labels_[optic_clust.labels_>-1]))
-        i+=1
-    
-    df_tmp.to_csv(write_path+filename, header=True, index=False)
-
 
 Parallel(n_jobs=n)(delayed(parallel_OPTICS_cluster_sensitivity)(filename,dist_dir,write_path) for filename in os.listdir(dist_dir))
 
