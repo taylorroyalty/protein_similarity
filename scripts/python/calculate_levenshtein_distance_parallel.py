@@ -24,6 +24,7 @@ swiss = pd.DataFrame(swiss,columns=(['id','annotation','sequence']))
 
 #generate all unique annotations
 swiss_anno_500=swiss.groupby("annotation").filter(lambda x: len(x)>100).reset_index(drop=True)
+swiss_anno_500.to_csv('data/swiss_n100.tsv',sep='\t',index=False)
 swiss_anno_uniq=swiss_anno_500.annotation.unique()
 
 #parallelize levenshstein distance calculation for fasta files

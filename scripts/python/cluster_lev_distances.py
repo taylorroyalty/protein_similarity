@@ -27,10 +27,7 @@ def parallel_OPTICS_cluster_sensitivity(filename,dist_dir,pnt,write_path):
     #suppress runtime warning for OPTICS algorithm. dividing by small number 
     warnings.filterwarnings("ignore", category=RuntimeWarning) 
     file=np.loadtxt(open(dist_dir+filename,'rt').readlines()[:-1],delimiter=",")
-    file=np.loadtxt(open(dist_dir+filename,'rt').readlines()[:-1],delimiter=",")
-    # file=np.loadtxt(dist_dir+filename,delimiter=',')[:-1,:] 
-    id_list=file[-1,:]
-    file=file[:-1,:]
+    id_list=open(dist_dir+filename,'rt').readlines()[-1].split("\n")[0].split(",")
     
 
     #perform multidimensional scaling on the levenshtein distance matrix for 2D visualization
@@ -43,9 +40,12 @@ def parallel_OPTICS_cluster_sensitivity(filename,dist_dir,pnt,write_path):
     optic_clust=optic_obj.fit(file)
     
     #generate data.frame
-    clust_df=pd.DataFrame(data=mds_comp,columns=["Component_1","Component_2"])
+    clust_df=pd.DataFrame(data=mds_comp,columns=['Component_1','Component_2'])
     clust_df['Cluster']=optic_clust.labels_
     clust_df['id']=id_list
+    
+    #merge sequence data from 
+    clust_df=pd.merge(clust_df,swiss100,on='id')
 
     
     clust_df.to_csv(write_path+filename, header=True, index=False)
