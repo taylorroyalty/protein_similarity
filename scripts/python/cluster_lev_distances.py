@@ -7,7 +7,8 @@ Created on Mon Aug 24 15:49:35 2020
 
 from sklearn.cluster import OPTICS
 from joblib import Parallel, delayed
-from sklearn.manifold import MDS
+# from sklearn.manifold import MDS
+from sklearn.manifold import TSNE
 
 import numpy as np
 import pandas as pd
@@ -31,8 +32,10 @@ def parallel_OPTICS_cluster_sensitivity(filename,dist_dir,pnt,write_path):
     
 
     #perform multidimensional scaling on the levenshtein distance matrix for 2D visualization
-    mds_obj=MDS(n_components=2, dissimilarity='precomputed', random_state=1)
-    mds_comp=mds_obj.fit_transform(file)
+    tsne = TSNE(n_components=2, random_state=0)
+    tsne_comp=tsne.fit_transform(file)
+    # mds_obj=MDS(n_components=2, dissimilarity='precomputed', random_state=1)
+    # mds_comp=mds_obj.fit_transform(file)
 
     print(filename)
     # perform OPTICS clustering 
@@ -40,7 +43,7 @@ def parallel_OPTICS_cluster_sensitivity(filename,dist_dir,pnt,write_path):
     optic_clust=optic_obj.fit(file)
     
     #generate data.frame
-    clust_df=pd.DataFrame(data=mds_comp,columns=['Component_1','Component_2'])
+    clust_df=pd.DataFrame(data=tsne_comp,columns=['Component_1','Component_2'])
     clust_df['Cluster']=optic_clust.labels_
     clust_df['id']=id_list
     
